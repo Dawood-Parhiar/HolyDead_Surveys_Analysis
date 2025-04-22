@@ -1,0 +1,227 @@
+---
+title: "HolyDead Feedback Analysis"
+subtitle: "Full Visual Report of Player Responses"
+author: "Dawood Parhiar"
+date: "04/22/2025"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("readxl")) install.packages("readxl")
+if (!require("janitor")) install.packages("janitor")
+if (!require("wordcloud")) install.packages("wordcloud")
+if (!require("tm")) install.packages("tm")
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(wordcloud)
+library(tm)
+
+survey_data <- read_excel("Data/Feedback1.xlsx")
+survey_data <- survey_data %>% clean_names()
+
+
+```
+
+```{r}
+names(survey_data)
+```
+# Introduction
+
+This report presents a descriptive analysis of data collected from a survey on streaming habits. Participants answered questions about their viewing behavior, mood, and platform preferences.
+
+We use basic statistics and visualizations to explore relationships between variables and identify patterns.
+
+---
+
+# 1. Dataset Overview
+
+We begin by exploring the structure of the dataset.
+
+## 1.1 Preview of the Data
+
+```{r}
+head(survey_data)
+```
+
+## 1.2 Dataset Structure
+
+```{r}
+str(survey_data)
+```
+
+
+# 1. Enjoyability & Game Duration
+
+```{r}
+ggplot(survey_data, aes(x = as.factor(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_bar(fill = "darkorchid") +
+  labs(title = "Game Enjoyability (1–5 Scale)", x = "Enjoyment Rating", y = "Count")
+
+# Count ratings
+enjoy_counts <- survey_data %>%
+  count(on_a_scale_of_1_5_how_enjoyable_was_the_game) %>%
+  mutate(percentage = n / sum(n),
+         label = paste0(on_a_scale_of_1_5_how_enjoyable_was_the_game, " (", round(percentage * 100), "%)"))
+
+# donut chart
+ggplot(enjoy_counts, aes(x = 2, y = percentage, fill = as.factor(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  xlim(0.5, 2.5) +  # Creates the donut hole
+  theme_void() +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 4) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Game Enjoyability (Donut Chart)", fill = "Rating")
+
+
+survey_data %>%
+  count(how_long_did_you_play_the_game) %>%
+  ggplot(aes(x = reorder(how_long_did_you_play_the_game, -n), y = n)) +
+  geom_col(fill = "darkcyan") +
+  labs(title = "How Long Did Players Play the Game?", x = "Play Time", y = "Count")
+
+# boxplot with outlier detection for play time categories
+ggplot(survey_data, aes(x = how_long_did_you_play_the_game, 
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "darkcyan", outlier.color = "red", outlier.shape = 8) +
+  labs(title = "Enjoyability by Play Time (Boxplot)", 
+       x = "Play Time Duration", 
+       y = "Enjoyment Rating (1–5)") +
+  theme_minimal()
+
+
+```
+
+# 2. Controls and UI
+
+```{r}
+ggplot(survey_data, aes(x = were_the_controls_easy_to_learn)) +
+  geom_bar(fill = "lightblue") +
+  labs(title = "Ease of Learning Controls", x = "Response", y = "Count")
+
+survey_data %>%
+  ggplot(aes(x = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "white") +
+  labs(title = "Control Responsiveness", x = "Rating (1 = Laggy, 5 = Very Responsive)", y = "Count")
+
+ggplot(survey_data, aes(x = did_the_games_ui_elements_feel_clear_and_intuitive)) +
+  geom_bar(fill = "steelblue") +
+  labs(title = "Clarity of UI Elements", x = "Response", y = "Count")
+```
+
+# 3. Challenge and Confusion
+
+```{r}
+ggplot(survey_data, aes(x = was_the_game_difficulty_balanced)) +
+  geom_bar(fill = "orange") +
+  labs(title = "Was the Game Difficulty Balanced?", x = "Response", y = "Count")
+
+ggplot(survey_data, aes(x = did_you_get_stuck_or_confused_at_any_point)) +
+  geom_bar(fill = "tomato") +
+  labs(title = "Did Players Get Stuck or Confused?", x = "Response", y = "Count")
+```
+
+# 4. Immersion and Experience
+
+```{r}
+ggplot(survey_data, aes(x = did_the_game_audio_enhance_your_experience)) +
+  geom_bar(fill = "darkgreen") +
+  labs(title = "Did Audio Enhance the Experience?", x = "Response", y = "Count")
+
+ggplot(survey_data, aes(x = did_the_game_world_feel_immersive)) +
+  geom_bar(fill = "forestgreen") +
+  labs(title = "Immersion in Game World", x = "Response", y = "Count")
+
+ggplot(survey_data, aes(x = did_you_feel_a_sense_of_progression_as_you_played)) +
+  geom_bar(fill = "seagreen") +
+  labs(title = "Sense of Progression", x = "Response", y = "Count")
+```
+
+# 5. Visual & Audio Fidelity
+
+```{r}
+ggplot(survey_data, aes(x = did_the_character_movement_feel_smooth_and_natural)) +
+  geom_bar(fill = "purple") +
+  labs(title = "Character Movement Feedback", x = "Response", y = "Count")
+
+ggplot(survey_data, aes(x = did_the_graphics_and_art_style_match_the_games_theme)) +
+  geom_bar(fill = "darkred") +
+  labs(title = "Visual Style Fit the Theme?", x = "Response", y = "Count")
+```
+
+# 6. Bugs, Glitches & Performance
+
+```{r}
+ggplot(survey_data, aes(x = did_you_encounter_any_bugs_or_glitches)) +
+  geom_bar(fill = "red") +
+  labs(title = "Bug or Glitch Encountered?", x = "Response", y = "Count")
+
+ggplot(survey_data, aes(x = did_you_experience_any_lag_frame_drops_or_performance_issues)) +
+  geom_bar(fill = "firebrick") +
+  labs(title = "Performance Issues Experienced?", x = "Response", y = "Count")
+```
+
+# 7. Word Clouds (Open Feedback)
+
+```{r}
+least_enjoyed_text <- na.omit(survey_data$what_part_of_the_game_did_you_enjoy_the_least)
+if (length(least_enjoyed_text) > 0) {
+  corpus <- Corpus(VectorSource(least_enjoyed_text)) %>%
+    tm_map(content_transformer(tolower)) %>%
+    tm_map(removePunctuation) %>%
+    tm_map(removeNumbers) %>%
+    tm_map(removeWords, stopwords("en"))
+
+  wordcloud(corpus, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+} else {
+  print("No responses for least enjoyed game part.")
+}
+
+bugs_text <- na.omit(survey_data$if_yes_please_specify_2)
+if (length(bugs_text) > 0) {
+  corpus2 <- Corpus(VectorSource(bugs_text)) %>%
+    tm_map(content_transformer(tolower)) %>%
+    tm_map(removePunctuation) %>%
+    tm_map(removeNumbers) %>%
+    tm_map(removeWords, stopwords("en"))
+
+  wordcloud(corpus2, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+} else {
+  print("No bug description responses.")
+}
+```
+# 8. Boxplots & Correlation Insights
+
+## 8.1 Boxplot: Enjoyability vs. Play Time
+
+```{r}
+
+# boxplot: Enjoyment rating by play time
+ggplot(survey_data, aes(x = how_long_did_you_play_the_game,
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "plum", alpha = 0.7) +
+  labs(title = "Enjoyability by Play Time",
+       x = "Play Time",
+       y = "Enjoyment Rating (1–5)") +
+  theme_minimal()
+
+
+ 
+```
+
+```{r}
+ggplot(survey_data, aes(x = as.factor(how_responsive_did_the_controls_feel_1_laggy_5_very_responsive),
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "skyblue", alpha = 0.7) +
+  labs(title = "Enjoyability vs. Control Responsiveness",
+       x = "Control Responsiveness (1–5)",
+       y = "Enjoyment Rating (1–5)") +
+  theme_minimal()
+```
+
+# Conclusion
+
+This visual report captures the full spectrum of feedback from the HolyDead survey, helping identify strong and weak areas in gameplay, design, and overall experience.

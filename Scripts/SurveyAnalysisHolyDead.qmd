@@ -1,0 +1,172 @@
+---
+title: "Survey Analysis Holy Dead"
+subtitle: "Post Production User Testing"
+Author: "Dawood Parhiar"
+date: "22/04/2025"
+---
+
+```{r setup, include=FALSE}
+# Load tidyverse for wrangling and visualization
+
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("readxl")) install.packages("readxl")
+if (!require("janitor")) install.packages("janitor")
+if (!require("wordcloud")) install.packages("wordcloud")
+if (!require("tm")) install.packages("tm")
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(wordcloud)
+library(tm)
+
+# For data wrangling, plotting — includes ggplot2, dplyr, readr, etc.
+
+# Clear Console
+cat("\014")
+
+library(wordcloud)
+
+# Load survey data
+
+survey_data <- read_excel("Data/Holy_Dead_Feedback_Form_Post_Production.xlsx") 
+
+survey_data <- survey_data %>% clean_names()
+```
+#Introduction
+This report presents a descriptive analysis of data collected from a user testing session that was conducted with the mixed audience who played our game HolyDead and answered questions through a feedback form.
+
+We use basic statistics and visualizations to explore relationships between variables and identify patterns.
+
+---
+
+# 1. Dataset Overview
+
+We begin by exploring the structure of the dataset.
+
+## 1.1 Preview of the Data
+
+```{r}
+head(survey_data)
+```
+
+## 1.2 Dataset Structure
+
+```{r}
+str(survey_data)
+```
+
+```{r}
+names(survey_data)
+```
+---
+
+
+# 2. Descriptive Statistics
+
+## 2.1 Enjoyability Summary
+
+```{r}
+
+table(survey_data$on_a_scale_of_1_5_how_enjoyable_was_the_game)
+```
+
+## 2.2 Control Responsiveness
+
+```{r}
+summary(survey_data$how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)
+```
+
+
+## 3.2 Control Responsiveness (Histogram)
+
+```{r}
+ggplot(survey_data, aes(x = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
+  geom_histogram(binwidth = 1, fill = "purple", color = "white") +
+  labs(title = "Control Responsiveness",
+       x = "Responsiveness Rating",
+       y = "Number of Responses")
+```
+
+## 3.3 Immersion Feedback (Pie Chart)
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+data <- survey_data %>%
+  count(did_the_game_world_feel_immersive) %>%
+  mutate(prop = n / sum(n),
+         ypos = cumsum(prop) - 0.5 * prop)
+
+ggplot(data, aes(x = 2, y = prop, fill = did_the_game_world_feel_immersive)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  xlim(0.5, 2.5) +
+  geom_text(aes(y = ypos, label = scales::percent(prop, accuracy = 1)), color = "white") +
+  theme_void() +
+  labs(title = "Immersion Feedback (Donut Chart)") +
+  theme(legend.position = "right")
+
+
+```
+
+## 3.4 Enjoyability by Age Group (Boxplot)
+
+```{r}
+ggplot(survey_data, aes(x = what_is_our_age_group,
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "orange") +
+  labs(title = "Enjoyability by Age Group",
+       x = "Age Group",
+       y = "Enjoyment Rating")
+```
+
+---
+
+# 4. Bugs and Glitches Feedback
+
+## 4.1 Bug Reports (Bar Chart)
+
+```{r}
+ggplot(survey_data, aes(x = did_you_encounter_any_bugs_or_glitches)) +
+  geom_bar(fill = "red") +
+  labs(title = "Reported Bugs or Glitches",
+       x = "Response",
+       y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+---
+# 5. Word Clouds for Open Feedback
+
+## 5.1 Bug Descriptions
+
+```{r}
+bugs_text <- survey_data$if_yes_please_specify
+bugs_corpus <- Corpus(VectorSource(bugs_text))
+bugs_corpus <- bugs_corpus %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, stopwords("en"))
+
+wordcloud(bugs_corpus, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+```
+
+## 5.2 Least Enjoyed Game Parts
+
+```{r}
+least_enjoyed_text <- survey_data$what_part_of_the_game_did_you_enjoy_the_least
+least_enjoyed_corpus <- Corpus(VectorSource(least_enjoyed_text)) %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, stopwords("en"))
+
+wordcloud(least_enjoyed_corpus, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+```
+
+# Conclusion
+
+This analysis highlights general player sentiment and usability of the HolyDead game. Most players found the controls responsive and the game immersive, with a few areas such as clarity of feedback and minor bugs noted for improvement.
