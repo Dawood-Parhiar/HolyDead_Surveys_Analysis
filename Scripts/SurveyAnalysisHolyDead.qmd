@@ -2,7 +2,17 @@
 title: "Survey Analysis Holy Dead"
 subtitle: "Post Production User Testing"
 Author: "Dawood Parhiar"
-date: "22/04/2025"
+date: "`r Sys.Date()`"
+format:
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    fig-width: 6
+    fig-height: 4
+    echo: false
+    warning: false
+
 ---
 
 ```{r setup, include=FALSE}
@@ -29,71 +39,140 @@ library(wordcloud)
 
 # Load survey data
 
-survey_data <- read_excel("Data/Holy_Dead_Feedback_Form_Post_Production.xlsx") 
+survey_data_1 <- read_excel("Data/Holy_Dead_Feedback_Form_Post_Production.xlsx")
+survey_data_2 <- read_excel("Data/Holy_Dead_Feedback_Production.xlsx")
+survey_data <- bind_rows(survey_data_1, survey_data_2)
 
+# Preview combined dataset
+glimpse(survey_data)
 survey_data <- survey_data %>% clean_names()
 ```
-#Introduction
-This report presents a descriptive analysis of data collected from a user testing session that was conducted with the mixed audience who played our game HolyDead and answered questions through a feedback form.
+
+#Introduction This report presents a descriptive analysis of data collected from two sessions of user testing that were conducted with the mixed audience who played our game HolyDead and answered questions through a feedback form.
 
 We use basic statistics and visualizations to explore relationships between variables and identify patterns.
 
----
+------------------------------------------------------------------------
 
 # 1. Dataset Overview
 
 We begin by exploring the structure of the dataset.
 
-## 1.1 Preview of the Data
+# 1.1 Preview of the Data
 
-```{r}
+```{r , include=FALSE}
 head(survey_data)
 ```
 
 ## 1.2 Dataset Structure
 
-```{r}
+```{r , include=FALSE}
 str(survey_data)
 ```
 
-```{r}
+```{r , include=FALSE}
 names(survey_data)
 ```
----
 
+------------------------------------------------------------------------
 
 # 2. Descriptive Statistics
 
-## 2.1 Enjoyability Summary
+Here we summarize numerical variables using measures like
+
+# 2.1 Summary of Key Variables
 
 ```{r}
 
-table(survey_data$on_a_scale_of_1_5_how_enjoyable_was_the_game)
+#summary(select(survey_data, what_is_our_age_group,how_long_did_you_play_the_game, on_a_scale_of_1_5_how_enjoyable_was_the_game, was_the_game_difficulty_balanced))
+
+#code from chatgpt to count and show the data that is not numerical from the coumns
+survey_data %>%
+  mutate(
+    Age_group = as.factor(what_is_your_age_group),
+    Gameplay_Time = as.factor(how_long_did_you_play_the_game),
+    Difficulty = as.factor(was_the_game_difficulty_balanced)
+  ) %>%
+  select(Age_group, Gameplay_Time, on_a_scale_of_1_5_how_enjoyable_was_the_game, Difficulty, how_responsive_did_the_controls_feel_1_laggy_5_very_responsive) %>%
+  summary()
+
+
 ```
 
-## 2.2 Control Responsiveness
+# 2.2 Control Responsiveness
 
 ```{r}
-summary(survey_data$how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)
+#code from chatgpt
+survey_data %>%
+  select(how_responsive_did_the_controls_feel_1_laggy_5_very_responsive) %>%
+  summary()
+
+```
+#3 Data Visualizations
+
+# 3.1 Control Responsiveness (Histogram)
+
+Here we are visualising the controls responsivensess in the violin plot. we found out that most of the users rated controls being very much responsive for example each designated key responds to the actions binded to it. However, some users have rated 3/5 which makes us to deep dive in this matter and find out more information from the users.
+
+```{r}
+#code from chatgpt
+
+#violin
+ggplot(survey_data, aes(x = "", y = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
+  geom_violin(fill = "lightgreen", color = "black") +
+  geom_jitter(width = 0.1, alpha = 0.5) +
+  labs(title = "Control Responsiveness (Violin Plot)", 
+       y = "Responsiveness Rating", 
+       x = "") +
+  theme_minimal()
+
+
+
 ```
 
+#3.2 Gameplay Time Barplot and lollypop chart
 
-## 3.2 Control Responsiveness (Histogram)
+We realized from the bar plot below that most of the players have played the game for more than 3 minutes which means they have played the level more than once. A typical gameplay of completing the level is on average 2 minutes.
 
 ```{r}
-ggplot(survey_data, aes(x = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
-  geom_histogram(binwidth = 1, fill = "purple", color = "white") +
-  labs(title = "Control Responsiveness",
-       x = "Responsiveness Rating",
-       y = "Number of Responses")
+#code from chatgpt
+survey_data %>%
+  count(how_long_did_you_play_the_game) %>%
+  ggplot(aes(x = how_long_did_you_play_the_game, y = n)) +
+  geom_col(fill = 'lightblue') +
+  labs(title = "Gameplay Time",
+       x = "Time Category",
+       y = "Number of Players") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+survey_data %>%
+  count(how_long_did_you_play_the_game) %>%
+  ggplot(aes(x = reorder(how_long_did_you_play_the_game, n), y = n)) +
+  geom_segment(aes(xend = how_long_did_you_play_the_game, yend = 0), color = "skyblue") +
+  geom_point(size = 4, color = "dodgerblue4") +
+  coord_flip() + # Horizontal view
+  labs(title = "Gameplay Time (Lollipop Chart)", 
+       x = "Time Category", 
+       y = "Number of Players") +
+  theme_minimal()
+
+
+data <- survey_data %>%
+  count(how_long_did_you_play_the_game) %>%
+  mutate(percentage = n / sum(n),
+         label = paste0(how_long_did_you_play_the_game, " (", round(percentage*100), "%)"))
+
+
+
 ```
 
-## 3.3 Immersion Feedback (Pie Chart)
+# 3.3 Immersion Feedback (Pie Chart)
 
 ```{r}
-library(ggplot2)
-library(dplyr)
 
+#code from chatgpt
 data <- survey_data %>%
   count(did_the_game_world_feel_immersive) %>%
   mutate(prop = n / sum(n),
@@ -108,13 +187,51 @@ ggplot(data, aes(x = 2, y = prop, fill = did_the_game_world_feel_immersive)) +
   labs(title = "Immersion Feedback (Donut Chart)") +
   theme(legend.position = "right")
 
+survey_data %>%
+  count(did_the_game_world_feel_immersive) %>%
+  ggplot(aes(x = "", y = n, fill = did_the_game_world_feel_immersive)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Immersion Feedback (Stacked Bar)", x = "", y = "Number of Players") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 
 ```
 
-## 3.4 Enjoyability by Age Group (Boxplot)
+#3.4 Combine immersion and time played
+
+Below we have combined the results from the above two visuals to find out the relation and a clear picture of the users who rated the game as being immersive or not with the time user played the game.
 
 ```{r}
-ggplot(survey_data, aes(x = what_is_our_age_group,
+
+#code from chatgpt
+# First: Prepare the data
+data <- survey_data %>%
+  count(how_long_did_you_play_the_game, did_the_game_world_feel_immersive)
+
+# Now: Plot side-by-side (position = "dodge")
+ggplot(data, aes(x = how_long_did_you_play_the_game, 
+                 y = n, 
+                 fill = did_the_game_world_feel_immersive)) +
+  geom_col(position = "dodge") +
+  labs(title = "Immersion Feedback by Gameplay Time (Side-by-Side)",
+       x = "Gameplay Time",
+       y = "Number of Players",
+       fill = "Felt Immersed?") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+```
+
+# 3.5 Enjoyability by Age Group (Boxplot)
+
+Below we are measuring the enjoyability of the game with the age group, and we tend to realize that users 19-22 years old enjoyed more than average.
+
+```{r}
+#code from chatgpt
+ggplot(survey_data, aes(x = what_is_your_age_group,
                         y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
   geom_boxplot(fill = "orange") +
   labs(title = "Enjoyability by Age Group",
@@ -122,49 +239,211 @@ ggplot(survey_data, aes(x = what_is_our_age_group,
        y = "Enjoyment Rating")
 ```
 
----
+#3.6 Enjoyability and Game Duration
 
-# 4. Bugs and Glitches Feedback
-
-## 4.1 Bug Reports (Bar Chart)
+The plot below shows the relationship between Enjoyability and play time for users, The results show us that users have rated game being enjoyable more than average.
 
 ```{r}
-ggplot(survey_data, aes(x = did_you_encounter_any_bugs_or_glitches)) +
-  geom_bar(fill = "red") +
-  labs(title = "Reported Bugs or Glitches",
-       x = "Response",
-       y = "Count") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+#code from chatGpt
+# boxplot: Enjoyment rating by play time from ChatGpt
+ggplot(survey_data, aes(x = how_long_did_you_play_the_game,
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "plum", alpha = 0.7) +
+  labs(title = "Enjoyability by Play Time",
+       x = "Play Time",
+       y = "Enjoyment Rating (1–5)") +
+  theme_minimal()
+
 ```
 
----
-# 5. Word Clouds for Open Feedback
+#3.7 Enjoyability vs Controls Responsiveness
 
-## 5.1 Bug Descriptions
+The plot shows the relationship between the control responsiveness and enjoy ability ratings. Players who rated the controls as more responsive (scores of 4 or 5) have reported higher enjoyment levels.
 
 ```{r}
-bugs_text <- survey_data$if_yes_please_specify
-bugs_corpus <- Corpus(VectorSource(bugs_text))
-bugs_corpus <- bugs_corpus %>%
-  tm_map(content_transformer(tolower)) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(removeNumbers) %>%
-  tm_map(removeWords, stopwords("en"))
-
-wordcloud(bugs_corpus, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+#code from chatpgt
+ggplot(survey_data, aes(x = as.factor(how_responsive_did_the_controls_feel_1_laggy_5_very_responsive),
+                        y = as.numeric(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
+  geom_boxplot(fill = "skyblue", alpha = 0.7) +
+  labs(title = "Enjoyability vs. Control Responsiveness",
+       x = "Control Responsiveness (1–5)",
+       y = "Enjoyment Rating (1–5)") +
+  theme_minimal()
 ```
 
-## 5.2 Least Enjoyed Game Parts
+# 4. Word Clouds for Open Feedback
+
+# 4.1 Confused/Stuck Descriptions
+
+In the word cloud below, the users have answered If they were stuck at any point in the game and what was that thing. most of the users have said being stuck on performing dash to proceed with the level.
 
 ```{r}
-least_enjoyed_text <- survey_data$what_part_of_the_game_did_you_enjoy_the_least
-least_enjoyed_corpus <- Corpus(VectorSource(least_enjoyed_text)) %>%
-  tm_map(content_transformer(tolower)) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(removeNumbers) %>%
-  tm_map(removeWords, stopwords("en"))
+#code from chatgpt
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
 
-wordcloud(least_enjoyed_corpus, max.words = 100, colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+# Step 1: Extract the point feedback text
+bugs_text <- na.omit(survey_data$if_yes_please_specify)
+
+# Step 2: Check if there is anything to plot
+if (length(bugs_text) > 0) {
+  
+  # Step 3: Build corpus
+  bugs_corpus <- Corpus(VectorSource(bugs_text))
+  
+  # Step 4: Clean the corpus
+  bugs_corpus <- tm_map(bugs_corpus, content_transformer(tolower))
+  bugs_corpus <- tm_map(bugs_corpus, removePunctuation)
+  bugs_corpus <- tm_map(bugs_corpus, removeNumbers)
+  bugs_corpus <- tm_map(bugs_corpus, removeWords, c(stopwords("en"), "game", "bug", "bugs", "player", "issue", "problem", "controls", "character"))
+  
+  # Step 5: Convert to plain text
+  cleaned_bugs_text <- sapply(bugs_corpus, as.character)
+  
+  # Step 6: Remove empty texts
+  cleaned_bugs_text <- cleaned_bugs_text[cleaned_bugs_text != ""]
+  
+  # Step 7: Word cloud
+  if (length(cleaned_bugs_text) > 0) {
+    wordcloud(cleaned_bugs_text, 
+              min.freq = 2,
+              max.words = 100, 
+              colors = brewer.pal(3, "Dark2"), 
+              scale = c(3, 0.5),
+              random.order = FALSE)
+  } else {
+    print("No valid bug descriptions after cleaning.")
+  }
+  
+} else {
+  print("No bug feedback available.")
+}
+
+```
+
+# 4.2 Least Enjoyed Game Parts
+
+Below we have the word cloud where users tell us about the least enjoyable parts of the game. As a result, users less enjoyed long jump and repetetive behaviour of enemies.
+
+```{r}
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+#code from chatgpt
+# Remove NA values first
+least_enjoyed_text <- na.omit(survey_data$what_part_of_the_game_did_you_enjoy_the_least)
+
+if (length(least_enjoyed_text) > 0) {
+  
+  # Create Corpus
+  least_enjoyed_corpus <- Corpus(VectorSource(least_enjoyed_text))
+  
+  # Apply cleaning steps
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, content_transformer(tolower))
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removePunctuation)
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removeNumbers)
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removeWords, c(stopwords("en"), "little", "none", "no", "nothing", "slow", "boring"))
+  
+  # Convert cleaned corpus to plain text
+  cleaned_texts <- sapply(least_enjoyed_corpus, as.character)
+  
+  # Filter empty ones
+  cleaned_texts <- cleaned_texts[cleaned_texts != ""]
+  
+  # If still non-empty, plot
+  if (length(cleaned_texts) > 0) {
+    wordcloud(cleaned_texts, min.freq = 2, max.words = 100, scale = c(2, 0.5), colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+  } else {
+    print("No valid cleaned responses to plot.")
+  }
+  
+} else {
+  print("No valid responses available.")
+}
+
+```
+
+# 4.3 Bugs
+
+Below from the data we have a word cloud to present some bugs that players caught.
+
+```{r}
+
+#code reused from chatgpt to omit bugs data
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+#code from chatgpt
+# Remove NA values first
+least_enjoyed_text <- na.omit(survey_data$did_you_encounter_any_bugs_or_glitches)
+
+if (length(least_enjoyed_text) > 0) {
+  
+  # Create Corpus
+  least_enjoyed_corpus <- Corpus(VectorSource(least_enjoyed_text))
+  
+  # Apply cleaning steps
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, content_transformer(tolower))
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removePunctuation)
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removeNumbers)
+  least_enjoyed_corpus <- tm_map(least_enjoyed_corpus, removeWords, c(stopwords("en"), "little", "none", "no", "nothing", "slow", "boring"))
+  
+  # Convert cleaned corpus to plain text
+  cleaned_texts <- sapply(least_enjoyed_corpus, as.character)
+  
+  # Filter empty ones
+  cleaned_texts <- cleaned_texts[cleaned_texts != ""]
+  
+  # If still non-empty, plot
+  if (length(cleaned_texts) > 0) {
+    wordcloud(cleaned_texts, min.freq = 2, max.words = 100, scale = c(2, 0.5), colors = brewer.pal(8, "Dark2"), random.order = FALSE)
+  } else {
+    print("No valid cleaned responses to plot.")
+  }
+  
+} else {
+  print("No valid responses available.")
+}
+
+```
+
+#5.1 Corelations
+
+In the Correlation matrix below, our data has shown that there is a slight tendency for two variables to increase together. Hence, It is a weak positive relationship being 0.23. This suggests that players who found the game enjoyable has rated the controls being responsive.
+
+```{r, fig.align='center', fig.cap="Correlation Between Key Variables", fig.height=6, fig.width=6}
+
+#code from chatpgt
+library(dplyr)
+
+correlation_data <- survey_data %>%
+  select(
+    on_a_scale_of_1_5_how_enjoyable_was_the_game,
+    how_responsive_did_the_controls_feel_1_laggy_5_very_responsive,
+  
+  ) %>%
+  mutate(across(everything(), as.numeric))  # Make sure everything is numeric
+
+#matrix
+cor_matrix <- cor(correlation_data, use = "complete.obs")
+round(cor_matrix, 2)
+
+
+#visual
+library(ggcorrplot)
+
+ggcorrplot(cor_matrix, 
+           method = "circle", 
+           type = "lower", 
+           lab = TRUE, 
+           lab_size = 4, 
+           colors = c("red", "white", "green"),
+           title = "Correlation Between Key Variables",
+           ggtheme = theme_minimal())
+
+
+
 ```
 
 # Conclusion

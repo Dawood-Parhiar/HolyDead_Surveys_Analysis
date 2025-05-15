@@ -1,8 +1,9 @@
 ---
-title: "HolyDead Feedback Analysis – Round 2"
+title: "HolyDead Feedback Analysis"
+subtitle: "Report 2 from production phase of user testing "
 author: "Dawood Parhiar"
-date: "`r Sys.Date()`"
-format: html
+date: "23/04/2025"
+format: pdf 
 editor: visual
 ---
 
@@ -27,7 +28,7 @@ survey_data <- read_excel("Data/Feedback2.xlsx") %>%
 
 ## 1. Dataset Overview
 
-```{r}
+```{r , include=FALSE}
 head(survey_data)
 str(survey_data)
 ```
@@ -111,4 +112,5 @@ if (length(bug_text) > 0) {
 ```
 
 ## Conclusion
+
 This analysis summarizes key sentiments and suggestions from players based on the second feedback round for HolyDead. The visualizations provide insights into fun factor perception, frequent issues, and improvement ideas to iterate on the next version.

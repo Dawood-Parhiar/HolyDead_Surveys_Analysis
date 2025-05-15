@@ -1,9 +1,10 @@
 ---
 title: "HolyDead Feedback Analysis"
-subtitle: "Full Visual Report of Player Responses"
+subtitle: "Report from production phase of user testing"
 author: "Dawood Parhiar"
 date: "04/22/2025"
-output: html_document
+output: pdf
+editor: visual
 ---
 
 ```{r setup, include=FALSE}
@@ -19,22 +20,23 @@ library(janitor)
 library(wordcloud)
 library(tm)
 
-survey_data <- read_excel("Data/Feedback1.xlsx")
+survey_data <- read_excel("Data/Holy_Dead_Feedback_Production.xlsx")
 survey_data <- survey_data %>% clean_names()
 
 
 ```
 
-```{r}
+```{r setup , include=FALSE}
 names(survey_data)
 ```
+
 # Introduction
 
-This report presents a descriptive analysis of data collected from a survey on streaming habits. Participants answered questions about their viewing behavior, mood, and platform preferences.
+This report presents a descriptive analysis of data collected from user testing of our game Holy Dead in the production phase. Participants answered questions about the appeal, controls and fun factor of the game.
 
 We use basic statistics and visualizations to explore relationships between variables and identify patterns.
 
----
+------------------------------------------------------------------------
 
 # 1. Dataset Overview
 
@@ -42,46 +44,33 @@ We begin by exploring the structure of the dataset.
 
 ## 1.1 Preview of the Data
 
-```{r}
+```{r , include=FALSE}
 head(survey_data)
 ```
 
 ## 1.2 Dataset Structure
 
-```{r}
+```{r , include=FALSE}
 str(survey_data)
 ```
 
-
-# 1. Enjoyability & Game Duration
+#2. Key variables descriptive statistics summary Here we summarize numerical variables using measures like mean, median, and standard deviation.
 
 ```{r}
-ggplot(survey_data, aes(x = as.factor(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
-  geom_bar(fill = "darkorchid") +
-  labs(title = "Game Enjoyability (1–5 Scale)", x = "Enjoyment Rating", y = "Count")
-
-# Count ratings
-enjoy_counts <- survey_data %>%
-  count(on_a_scale_of_1_5_how_enjoyable_was_the_game) %>%
-  mutate(percentage = n / sum(n),
-         label = paste0(on_a_scale_of_1_5_how_enjoyable_was_the_game, " (", round(percentage * 100), "%)"))
-
-# donut chart
-ggplot(enjoy_counts, aes(x = 2, y = percentage, fill = as.factor(on_a_scale_of_1_5_how_enjoyable_was_the_game))) +
-  geom_col(width = 1, color = "white") +
-  coord_polar(theta = "y") +
-  xlim(0.5, 2.5) +  # Creates the donut hole
-  theme_void() +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 4) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(title = "Game Enjoyability (Donut Chart)", fill = "Rating")
-
-
 survey_data %>%
-  count(how_long_did_you_play_the_game) %>%
-  ggplot(aes(x = reorder(how_long_did_you_play_the_game, -n), y = n)) +
-  geom_col(fill = "darkcyan") +
-  labs(title = "How Long Did Players Play the Game?", x = "Play Time", y = "Count")
+  mutate(
+    Age_group = as.factor(what_is_your_age_group),
+    Gameplay_Time = as.factor(how_long_did_you_play_the_game),
+    Difficulty = as.factor(was_the_game_difficulty_balanced)
+  ) %>%
+  select(Age_group, Gameplay_Time, on_a_scale_of_1_5_how_enjoyable_was_the_game, Difficulty, how_responsive_did_the_controls_feel_1_laggy_5_very_responsive) %>%
+  summary()
+
+```
+
+# 3.1 Enjoyability & Game Duration
+
+```{r}
 
 # boxplot with outlier detection for play time categories
 ggplot(survey_data, aes(x = how_long_did_you_play_the_game, 
@@ -95,7 +84,7 @@ ggplot(survey_data, aes(x = how_long_did_you_play_the_game,
 
 ```
 
-# 2. Controls and UI
+# 2.1 Controls and UI
 
 ```{r}
 ggplot(survey_data, aes(x = were_the_controls_easy_to_learn)) +
@@ -193,6 +182,7 @@ if (length(bugs_text) > 0) {
   print("No bug description responses.")
 }
 ```
+
 # 8. Boxplots & Correlation Insights
 
 ## 8.1 Boxplot: Enjoyability vs. Play Time
