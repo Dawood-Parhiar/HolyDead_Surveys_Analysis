@@ -1,6 +1,5 @@
 ---
-title: "Survey Analysis Holy Dead"
-subtitle: "Post Production User Testing"
+title: "Data Analysis Holy Dead"
 Author: "Dawood Parhiar"
 date: "`r Sys.Date()`"
 format:
@@ -10,6 +9,7 @@ format:
     number-sections: true
     fig-width: 6
     fig-height: 4
+    fontsize: 10pt
     echo: false
     warning: false
 
@@ -46,25 +46,15 @@ survey_data <- bind_rows(survey_data_1, survey_data_2)
 # Preview combined dataset
 glimpse(survey_data)
 survey_data <- survey_data %>% clean_names()
+
+
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3)
 ```
-
-#Introduction This report presents a descriptive analysis of data collected from two sessions of user testing that were conducted with the mixed audience who played our game HolyDead and answered questions through a feedback form.
-
-We use basic statistics and visualizations to explore relationships between variables and identify patterns.
-
-------------------------------------------------------------------------
-
-# 1. Dataset Overview
-
-We begin by exploring the structure of the dataset.
-
-# 1.1 Preview of the Data
 
 ```{r , include=FALSE}
 head(survey_data)
 ```
 
-## 1.2 Dataset Structure
 
 ```{r , include=FALSE}
 str(survey_data)
@@ -74,13 +64,164 @@ str(survey_data)
 names(survey_data)
 ```
 
-------------------------------------------------------------------------
+## Executive Summary
+This report provides a comprehensive analysis of the user feedback collected from the game HolyDead. The analysis focuses on understanding player experiences, identifying areas for improvement, and gathering insights on the game's overall reception. The report includes descriptive statistics, visualizations, and word clouds to present the findings effectively. Key areas of focus include control responsiveness, gameplay time, immersion feedback, enjoyability ratings, and user-reported bugs or glitches. The analysis aims to inform future development decisions and enhance the overall player experience.
 
-# 2. Descriptive Statistics
+Key findings revealed that most players found the game fun and immersive, with over 50% rating enjoyability at 5/5. Controls were generally responsive, though some players described movement and dash mechanics as “slippery” or hard to master. Combat felt impactful, but lacked weight and pacing. Common issues included simplistic enemies and lack of feedback on damage.
 
-Here we summarize numerical variables using measures like
+Based on these insights, we recommend: reworking movement and combat systems, improving enemy AI and variety, enhancing menus and UI, and expanding content and narrative elements to deepen immersion and replayability in future builds.
 
-# 2.1 Summary of Key Variables
+## Introduction
+HolyDead is 3D first person slasher game, that offers an exciting, engaging and immersive experience, blending fast-paced combat with a deep, emotional narrative. The gameplay is full of fun whether you're a fan of classic dungeon crawlers, first-person shooters, or dark fantasy lore, there's something here for everyone. The game features a unique art style and engaging gameplay mechanics that aim to provide an immersive experience for players. 
+
+We use basic statistics and visualizations to explore relationships between variables and identify patterns. This report presents a descriptive analysis of data collected from two sessions of user testing that were conducted with the mixed audience who played our game HolyDead and answered questions through a feedback form. 
+
+The objectives of this testing were to understand the players' experience, identify areas for improvement, and gather insights on the game's overall reception. some sample questions that were asked during the testing are "Were the controls easy to learn", "Was the game difficulty balanced", "On a scale of 1-5 how enjoyable was the game".
+
+## Methodology
+
+The testing was conducted using a moderated, in-person testing approach. The play testing environment was set in the dedicated controlled room with 3 computers running simultaneously the game build 2.1 which was acquired after the production release of the game, and a moderator overseeing the playtester on each computer. 
+
+The playtesters were welcomed given a brief introduction of our game and were asked to play and then fill out a feedback form. The feedback form consisted of both quantitative and qualitative questions, including scale ratings and open-ended questions. The players were asked to complete the level of the game by exploring and interacting with the game environment with combat mechanics.We encouraged them to engage with key gameplay elements such as UI, movements, and enemies.
+
+The metrics collected were both quantitative and qualitative data, included player ratings on control responsiveness, gameplay time, immersion feedback, enjoyability ratings, and user-reported bugs or glitches through open ended questions and reported the least enjoyable parts of the game and where the players were stuck during the gameplay. 
+
+## Participants
+
+Participants were recruited from within the college through the help of lecturers and convincing some college students to give a go to our game, including both second- and third-year Game Development students as well as random volunteers from other departments. Recruitment was informal and voluntary, relying on interest in trying out the game and providing feedback, The volunteers were also excited to have a look on the projects from 4th year students and asses the work.
+
+The test group consisted of students familiar with gaming concepts and mechanics, though their experience levels varied. The exact age data was not collected, most participants were within the 18–24 age range, and all had some level of prior exposure to video games, either academically or recreationally. This made them suitable for evaluating usability and gameplay flow.
+
+Before participating, we provided an information leaflet to all users that detailed the purpose and structure of the test. They were also asked to sign a consent form, to confirm their voluntary participation and understanding of the process. Participants feedback was kept confidential, and no personally identifiable data was collected for example name email or gender identity.
+
+## Materials
+
+The game was tested using Build 2.1 on three Alienware desktop PCs running Windows. Each machine had a standard configuration with Intel i7 processors, 16GB RAM and dedicated NVIDIA graphics cards, ensuring smooth performance and consistency across test sessions. The headphones were also provided to the test users to asses the sound and immersiveness during the game.The game was run in full-screen mode with 30 inch monitor screens.
+
+The playtesting took place in a controlled classroom environment set up to resemble a casual gaming space. The layout allowed each participant their own station with minimal distractions. Moderators were present in the room, observing silently and stepping in only when participants asked for help or clarification.
+
+All feedback was collected using a structured Microsoft Form containing both multiple-choice and open-ended questions. Observations were logged manually by the test facilitators. No screen recordings or audio capture tools were used, ensuring a focus on player behavior and written feedback, ensuring respect to participants comfort and privacy.
+
+## Procedure
+
+Each testing session followed a consistent structure to ensure fairness. Participants were first welcomed into the playtesting area and asked to read an information leaflet which outlined the purpose of the user testing session. They then signed a consent form to confirm  participation. A brief introduction to the game’s controls and objectives was provided by one of the team members to each user before gameplay began.
+
+Participants were then given access to the game on the available PCs and encouraged to play freely with no time limit. They were not given specific instructions beyond general exploration, allowing for natural interaction with the game. During gameplay, participants were encouraged to think aloud, sharing their reactions, frustrations, or thoughts in real time.
+
+The facilitator remained nearby to observe player behavior and provide support if asked, while another team members recording non-verbal cues and in-game moments of hesitation or confusion.
+
+Players were told to interact with the game as they normally would and to speak out loud if they felt comfortable doing so. They were helped with the long jump techniques to go through the level and were asked to provide feedback on their experience, including any bugs or glitches they encountered.
+
+Session Duration:
+Each session lasted approximately 10–20 minutes, including  gameplay, and post-test feedback.
+
+## Data Analysis
+
+```{r, fig.width=7, fig.height=5}
+
+#code from chatgpt
+data <- survey_data %>%
+  count(on_a_scale_of_1_5_how_enjoyable_was_the_game) %>%
+  mutate(prop = n / sum(n),
+         ypos = cumsum(prop) - 0.5 * prop)
+
+ggplot(data, aes(x = 2, y = prop, fill = on_a_scale_of_1_5_how_enjoyable_was_the_game)) +
+  geom_col(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  xlim(0.5, 2.5) +
+  geom_text(aes(y = ypos, label = scales::percent(prop, accuracy = 1)), color = "white") +
+  theme_void() +
+  labs(title = "Fun Factor Feedback (Donut Chart)") +
+  theme(legend.position = "right")
+
+
+```
+
+The survey data provides insight into user perceptions of both the fun factor and control responsiveness in the game. The first chart, a doughnut plot, shows the distribution of Fun Factor ratings on a scale of 1 to 5. Most respondents rated the game positively, with 54% giving it a 5 and another 21% assigning a 4. Only 21% rated the fun factor as 3 as well. Notably, only one participant rated it below 3, suggesting that the game was moderately enjoyable for all players. 
+
+
+```{r}
+#code from chatgpt
+
+#violin
+ggplot(survey_data, aes(x = "", y = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
+  geom_violin(fill = "lightgreen", color = "black") +
+  geom_jitter(width = 0.1, alpha = 0.5) +
+  labs(title = "Control Responsiveness (Violin Plot)", 
+       y = "Responsiveness Rating", 
+       x = "") +
+  theme_minimal()
+
+
+ggplot(survey_data, aes(x = as.factor(how_responsive_did_the_controls_feel_1_laggy_5_very_responsive))) +
+  geom_bar(fill = "lightgreen", color = "black") +
+  labs(title = "Control Responsiveness (Bar Plot)",
+       x = "Responsiveness Rating (1 = Laggy, 5 = Very Responsive)",
+       y = "Number of Players") + scale_y_continuous(breaks = seq(0, 10, by = 2)) +  # 🔥 Force even ticks
+  
+  theme_minimal()
+
+
+```
+The second chart, a violin plot, focuses on control responsiveness, a key indicator of gameplay fluidity. Here, responses ranged from 1 to 5, with the majority rating the game as highly responsive: 13 respondents gave it a 5. Another 5 respondents rated it a 4 and 3 as well from another 5 , while only 1 gave it a 1. The lack of low ratings implies that the input system was greatly smooth and responsive. 
+
+
+Taken together, the data suggest a potential connection between control responsiveness and overall enjoyment. Players who experienced smooth, responsive controls were more likely to rate the game as fun, indicating that technical performance may play a key role in shaping perceived entertainment value
+
+
+
+### Disliked Aspects 
+
+Three key elements identified by testers in surveys that require improvement are Combat, Enemies, and Movement. With Combat, people would have preferred it to be slower. A few testers mentioned that they didn’t like the lack of a cooldown between attacks, which allowed them to spam their swings. Additionally, some testers felt that there was a lack of weight in the attacks. Then the Enemies, while the complaints for those were few, the consensus is that they were too simple and easy to defeat. And lastly, Movement. Just like with Combat, people seem to have preferred at least somewhat slower movement; the common descriptor of how it felt was slippery. Then, people didn’t like how the dash and jump felt, describing it as awkward or hard to get used to.
+
+### Favourite Aspects 
+
+Two favourite parts of the game include its Design/Style and Combat. The Design mostly refers to characters and animations by the testers, who have expressed that they like the smoothness of animation transitions and the art style the game is going for. People like the overall style of levels and atmosphere we were aiming for. Combat is another, even though a large portion of people want improvements in it, people still enjoyed that it was melee-focused, something that they haven’t seen in the genre.
+
+
+## Results 
+
+Players generally found the game fun and the controls responsive, suggesting that our core mechanics, such as movement and pacing, are functioning well. This indicates that the gameplay loop is engaging and technically solid, which is essential for player retention. High responsiveness scores also suggest that the input systems are performing reliably. Also, the results of the Boxplot suggest strong early engagement, but the dip at 7 minutes points to a need for better pacing. 
+
+From our surveys, we have gathered all the bug reports and parts that need improvement in our game. 
+
+Our first word cloud represents the words most commonly used when talking about needed improvements. In earlier testing, we haven’t implemented health loss tied to the UI yet, which has left players confused if they were taking damage or not, which is why the word “Health” is so highly used. The same is with “Enemies”, as users would report something akin to “Enemies weren’t taking my Health”. However, enemies were also reported whenever they talked about the difficulty of the game being too easy, asking the enemies to be stronger. The rest of the suggestions revolved around gameplay and fighting, wanting more weight and feel behind it, movement, wanting it to be slower, and general variety in content. The second word cloud represents the common words in user bug reports. “Enemies” and “Damage” are tied to the same issue we had in our earlier tests, where health indication wasn’t properly implemented. Another was with our outdated pause menu, that at the time lacked the option to return to the menu, forcing players to exit out of the game with ALT+F4, this has been fixed, however.
+
+Additionally, several respondents included additional comments suggesting new features, mechanics and content they’d like to see in future. Some of these suggestions included having sliders to help modify their mouse sensitivity and adding more weapons or different skills like having the dash do damage to the enemies.
+
+## Discussion 
+
+What we can gather from all the information is that we simply need to improve on controls, enemies, and adding more content.
+
+As we can see above, controls for movement and combat require us to slow it down a bit, players generally feel that the game might be too fast for a melee-focused game, and many don’t feel a lack of weight and responsiveness to their actions. A lot of polish also has to be made for jumping and the dash mechanic, to be more controllable and natural to use for the player.
+
+Enemies require to be more complex, as one user described them as “goofy”. They currently run at the player without any methodical movement, or they stand around and barely react to the player’s proximity. Improvements to the melee enemy swarm is something we should look into, and more defensive options for the ranged enemies to not be that easy to deal with.
+
+The content that people are asking for is content we have planned anyway, so simply working towards those is enough to satisfy them.
+
+
+## Recommendations 
+Here is our list of improvements that we plan for the future of the game, ordered by priority from top to bottom:
+
+•	Movement Rework – Improve how the jump and dash feel, slow down the movement, make it more controllable to feel the weight of the character.
+•	Combat Rework – Make attacking slower, simulate weight behind each attack through animation and response from the enemies, punish the player for swinging too much.
+•	Enemy System – Make enemies swarm around the player more cohesively, make ranged or vulnerable in melee range enemies respond to player’s proximity.
+•	UI and Menu – General improvements to the look and feel, add more options in the settings menu, include menus for the future features of the game.
+•	Enemy Variety – Make more enemy types, including bosses and tougher enemies, each with different behavior.
+•	Weapon Variety – Include more weapons for the player to pick and choose, as well as combine to deepen the skill depth of the game.
+•	More Levels – Levels of different areas and atmospheres, for visual variety.
+•	Narrative and Visual Flair – In-game cut scenes, lore bits, dialogue system, responsive environment to player actions.
+
+
+## Conclusion 
+
+Overall, data is somewhat expected, in some areas good to see that people enjoy certain elements. We are glad to see that the look and atmosphere of the game is well liked, and many are excited to see more of the game, one of the major complaints being that they wished to see more. Controls and enemies were somewhat expected by us to have issues, as those systems are a bit too simple in their implementation. We would likely rework many parts of the game to adjust to the players’ suggestions. The biggest surprise, that we would consider, is players asking for the game to be a little slower, which makes sense as the game is focused on melee combat which requires more time to respond.
+
+
+
+## Appendices 
+
+### Numeric data
 
 ```{r}
 
@@ -99,40 +240,8 @@ survey_data %>%
 
 ```
 
-# 2.2 Control Responsiveness
+### Gameplay Time Barplot and lollypop chart
 
-```{r}
-#code from chatgpt
-survey_data %>%
-  select(how_responsive_did_the_controls_feel_1_laggy_5_very_responsive) %>%
-  summary()
-
-```
-#3 Data Visualizations
-
-# 3.1 Control Responsiveness (Histogram)
-
-Here we are visualising the controls responsivensess in the violin plot. we found out that most of the users rated controls being very much responsive for example each designated key responds to the actions binded to it. However, some users have rated 3/5 which makes us to deep dive in this matter and find out more information from the users.
-
-```{r}
-#code from chatgpt
-
-#violin
-ggplot(survey_data, aes(x = "", y = how_responsive_did_the_controls_feel_1_laggy_5_very_responsive)) +
-  geom_violin(fill = "lightgreen", color = "black") +
-  geom_jitter(width = 0.1, alpha = 0.5) +
-  labs(title = "Control Responsiveness (Violin Plot)", 
-       y = "Responsiveness Rating", 
-       x = "") +
-  theme_minimal()
-
-
-
-```
-
-#3.2 Gameplay Time Barplot and lollypop chart
-
-We realized from the bar plot below that most of the players have played the game for more than 3 minutes which means they have played the level more than once. A typical gameplay of completing the level is on average 2 minutes.
 
 ```{r}
 #code from chatgpt
@@ -168,24 +277,11 @@ data <- survey_data %>%
 
 ```
 
-# 3.3 Immersion Feedback (Pie Chart)
+### Immersion Feedback (Pie Chart)
 
 ```{r}
 
-#code from chatgpt
-data <- survey_data %>%
-  count(did_the_game_world_feel_immersive) %>%
-  mutate(prop = n / sum(n),
-         ypos = cumsum(prop) - 0.5 * prop)
 
-ggplot(data, aes(x = 2, y = prop, fill = did_the_game_world_feel_immersive)) +
-  geom_col(width = 1, color = "white") +
-  coord_polar(theta = "y") +
-  xlim(0.5, 2.5) +
-  geom_text(aes(y = ypos, label = scales::percent(prop, accuracy = 1)), color = "white") +
-  theme_void() +
-  labs(title = "Immersion Feedback (Donut Chart)") +
-  theme(legend.position = "right")
 
 survey_data %>%
   count(did_the_game_world_feel_immersive) %>%
@@ -198,9 +294,7 @@ survey_data %>%
 
 ```
 
-#3.4 Combine immersion and time played
-
-Below we have combined the results from the above two visuals to find out the relation and a clear picture of the users who rated the game as being immersive or not with the time user played the game.
+### Combine immersion and time played
 
 ```{r}
 
@@ -225,9 +319,8 @@ ggplot(data, aes(x = how_long_did_you_play_the_game,
 
 ```
 
-# 3.5 Enjoyability by Age Group (Boxplot)
+### Enjoyability by Age Group (Boxplot)
 
-Below we are measuring the enjoyability of the game with the age group, and we tend to realize that users 19-22 years old enjoyed more than average.
 
 ```{r}
 #code from chatgpt
@@ -239,9 +332,8 @@ ggplot(survey_data, aes(x = what_is_your_age_group,
        y = "Enjoyment Rating")
 ```
 
-#3.6 Enjoyability and Game Duration
+### Enjoyability and Game Duration
 
-The plot below shows the relationship between Enjoyability and play time for users, The results show us that users have rated game being enjoyable more than average.
 
 ```{r}
 #code from chatGpt
@@ -256,9 +348,8 @@ ggplot(survey_data, aes(x = how_long_did_you_play_the_game,
 
 ```
 
-#3.7 Enjoyability vs Controls Responsiveness
+### Enjoyability vs Controls Responsiveness
 
-The plot shows the relationship between the control responsiveness and enjoy ability ratings. Players who rated the controls as more responsive (scores of 4 or 5) have reported higher enjoyment levels.
 
 ```{r}
 #code from chatpgt
@@ -271,11 +362,11 @@ ggplot(survey_data, aes(x = as.factor(how_responsive_did_the_controls_feel_1_lag
   theme_minimal()
 ```
 
-# 4. Word Clouds for Open Feedback
 
-# 4.1 Confused/Stuck Descriptions
 
-In the word cloud below, the users have answered If they were stuck at any point in the game and what was that thing. most of the users have said being stuck on performing dash to proceed with the level.
+## Word Clouds for Open Feedback:
+
+Confused/Stuck Descriptions
 
 ```{r}
 #code from chatgpt
@@ -322,9 +413,8 @@ if (length(bugs_text) > 0) {
 
 ```
 
-# 4.2 Least Enjoyed Game Parts
+### Least Enjoyed Game Parts
 
-Below we have the word cloud where users tell us about the least enjoyable parts of the game. As a result, users less enjoyed long jump and repetetive behaviour of enemies.
 
 ```{r}
 library(tm)
@@ -364,9 +454,8 @@ if (length(least_enjoyed_text) > 0) {
 
 ```
 
-# 4.3 Bugs
+### Bugs
 
-Below from the data we have a word cloud to present some bugs that players caught.
 
 ```{r}
 
@@ -408,9 +497,7 @@ if (length(least_enjoyed_text) > 0) {
 
 ```
 
-#5.1 Corelations
-
-In the Correlation matrix below, our data has shown that there is a slight tendency for two variables to increase together. Hence, It is a weak positive relationship being 0.23. This suggests that players who found the game enjoyable has rated the controls being responsive.
+### Corelations
 
 ```{r, fig.align='center', fig.cap="Correlation Between Key Variables", fig.height=6, fig.width=6}
 
@@ -445,7 +532,3 @@ ggcorrplot(cor_matrix,
 
 
 ```
-
-# Conclusion
-
-This analysis highlights general player sentiment and usability of the HolyDead game. Most players found the controls responsive and the game immersive, with a few areas such as clarity of feedback and minor bugs noted for improvement.
